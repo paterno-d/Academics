@@ -1,0 +1,215 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_CONTATOS 100
+#define TAM_NOME 50
+#define TAM_TELEFONE 15
+#define TAM_TIPO_CONT 9
+
+// Arranjo de funções do projeto
+void exibirMenu();
+void incluirContato();
+void excluirContato();
+void alterarContato();
+void listarContatos();
+void localizarContato();
+void removerNewLine(char *str);
+
+// Estrutura para representar um contato
+struct Contato {
+    int id;
+    char nome[TAM_NOME];
+    char telefone[TAM_TELEFONE];
+    char tipo_cont[TAM_TIPO_CONT];
+};
+
+// Função para inserir o número de telefone
+int validar_num(char *telefone) {
+   int num_tel_valido = 0;
+
+   for (int i = 0; telefone[i] != '\0'; i++) {
+        char k = telefone[i];
+        
+        // Não permite o registro de letras no número de telefone.
+        if (es_un_digito(k)) {
+            num_tel_valido = 1;
+        } else if (k != ' ' && k != '(' && k != ')' && k != '-' && k != '+') {
+            return 0; // Caractere inválido encontrado
+        }
+    }
+
+    // Verifica se tem pelo menos um número
+    if (!num_tel_valido) {
+        return 0;
+    }
+    
+    return 1;
+
+}
+
+// Array de contatos e variáveis de controle
+struct Contato contatos[MAX_CONTATOS];
+int num_contatos = 0;
+int proximo_id = 1;
+
+int main() {
+    int opcao;
+    
+    do {
+        exibirMenu();
+        scanf("%d", &opcao);
+        getchar();
+        
+        switch (opcao) {
+            case 1:
+                incluirContato();
+                break;
+            case 2:
+                excluirContato();
+                break;
+            case 3:
+                alterarContato();
+                break;
+            case 4:
+                listarContatos();
+                break;
+            case 5:
+                localizarContato();
+                break;
+            case 0:
+                printf("Saindo...\n");
+                break;
+            default:
+                printf("Opcao invalida!\n");
+        }
+    } while (opcao != 0);
+    
+    return 0;
+}
+
+
+// Função para exibir o menu
+void exibirMenu() {
+    printf("\nMenu:\n");
+    printf("1. Incluir um novo contato\n");
+    printf("2. Excluir um contato existente\n");
+    printf("3. Alterar um contato existente\n");
+    printf("4. Listar todos os contatos cadastrados\n");
+    printf("5. Localizar um contato\n");
+    printf("0. Sair\n");
+    printf("Escolha uma opcao: ");
+}
+
+// Função para incluir um novo contato
+void incluirContato() {
+    if (num_contatos >= MAX_CONTATOS) {
+        printf("Limite de contatos atingido!\n");
+        return;
+    }
+    
+    struct Contato novo;
+    novo.id = proximo_id++;
+    
+    printf("Digite o nome: ");
+    fgets(novo.nome, TAM_NOME, stdin);
+    removerNewLine(novo.nome);
+    
+    //Parâmetros para inserir o número de telefone
+    int num_telefono = 0;
+    while (!num_telefono){
+    printf("Digite o telefone: ");
+    fgets(novo.telefone, TAM_TELEFONE, stdin);
+
+        if (validar_num(fgets(novo.telefone, TAM_TELEFONE, stdin)))
+        removerNewLine(novo.telefone);
+        }
+
+    contatos[num_contatos] = novo;
+    num_contatos++;
+    printf("Contato incluido com sucesso! ID: %d\n", novo.id);
+}
+
+// Função para excluir um contato por ID
+void excluirContato() {
+    int id;
+    printf("Digite o ID do contato a excluir: ");
+    scanf("%d", &id);
+    
+    for (int i = 0; i < num_contatos; i++) {
+        if (contatos[i].id == id) {
+            // Desloca os elementos para frente
+            for (int j = i; j < num_contatos - 1; j++) {
+                contatos[j] = contatos[j + 1];
+            }
+            num_contatos--;
+            printf("Contato excluido com sucesso!\n");
+            return;
+        }
+    }
+    printf("Contato com ID %d nao encontrado!\n", id);
+}
+
+// Função para alterar um contato por ID
+void alterarContato() {
+    int id;
+    printf("Digite o ID do contato a alterar: ");
+    scanf("%d", &id);
+    getchar();
+
+    for (int i = 0; i < num_contatos; i++) {
+        if (contatos[i].id == id) {
+            printf("Digite o novo nome: ");
+            fgets(contatos[i].nome, TAM_NOME, stdin);
+            removerNewLine(contatos[i].nome);
+            
+            printf("Digite o novo telefone: ");
+            fgets(contatos[i].telefone, TAM_TELEFONE, stdin);
+            removerNewLine(contatos[i].telefone);
+            
+            printf("Contato alterado com sucesso!\n");
+            return;
+        }
+    }
+    printf("Contato com ID %d nao encontrado!\n", id);
+}
+
+// Função para listar todos os contatos
+void listarContatos() {
+    if (num_contatos == 0) {
+        printf("Nenhum contato cadastrado!\n");
+        return;
+    }
+    
+    printf("Lista de contatos:\n");
+    for (int i = 0; i < num_contatos; i++) {
+        printf("ID: %d | Nome: %s | Telefone: %s\n", contatos[i].id, contatos[i].nome, contatos[i].telefone);
+    }
+}
+
+// Função para localizar um contato por ID
+void localizarContato() {
+    int id;
+    printf("Digite o ID do contato a localizar: ");
+    scanf("%d", &id);
+    
+    for (int i = 0; i < num_contatos; i++) {
+        if (contatos[i].id == id) {
+            printf("Contato encontrado:\n");
+            printf("ID: %d|", contatos[i].id);
+            printf(" Nome: %s\n", contatos[i].nome);
+            printf("Telefone: %s\n", contatos[i].telefone);
+            return;
+        }
+    }
+    printf("Contato com ID %d não encontrado!\n", id);
+}
+
+// Função auxiliar para remover newline de uma string
+void removerNewLine(char *str) {
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (str[i] == '\n') {
+            str[i] = '\0';
+            break;
+        }
+    }
+}
